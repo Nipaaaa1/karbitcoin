@@ -8,8 +8,10 @@ public:
   std::string data;
   std::string previousHash;
   std::string hash;
+  int nonce;
 
   Block(const int &idx, const std::string &data, const std::string &prevHash);
 
   std::string calculateHash() const;
+  void mine(int difficulty);
 };

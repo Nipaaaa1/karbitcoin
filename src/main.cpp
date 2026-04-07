@@ -10,6 +10,7 @@ int main() {
   for (const auto &block : blockchain.getChain()) {
     std::cout << "Index: " << block.index << "\n";
     std::cout << "Data: " << block.data << "\n";
+    std::cout << "Nonce: " << block.nonce << "\n";
     std::cout << "Hash: " << block.hash << "\n";
     std::cout << "Prev: " << block.previousHash << "\n\n";
   }
