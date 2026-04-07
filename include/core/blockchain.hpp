@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/block.hpp"
+#include <string>
 #include <vector>
 
 class Blockchain {
@@ -11,7 +12,9 @@ private:
 public:
   Blockchain(int diff = 5);
 
-  void addBlock(const std::string &data);
+  void addBlock(const std::vector<Transaction> &txs);
+  double getBalance(const std::string &address) const;
+
   const std::vector<Block> &getChain() const;
 
 private:

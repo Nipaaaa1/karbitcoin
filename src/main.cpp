@@ -2,18 +2,16 @@
 #include <iostream>
 
 int main() {
-  Blockchain blockchain;
+  Blockchain blockchain(5);
 
-  blockchain.addBlock("Transaction 1");
-  blockchain.addBlock("Transaction 2");
+  std::vector<Transaction> txs1 = {Transaction("SYSTEM", "jamal", 100)};
 
-  for (const auto &block : blockchain.getChain()) {
-    std::cout << "Index: " << block.index << "\n";
-    std::cout << "Data: " << block.data << "\n";
-    std::cout << "Nonce: " << block.nonce << "\n";
-    std::cout << "Hash: " << block.hash << "\n";
-    std::cout << "Prev: " << block.previousHash << "\n\n";
-  }
+  blockchain.addBlock(txs1);
 
-  return 0;
+  std::vector<Transaction> txs2 = {Transaction("jamal", "udin", 30)};
+
+  blockchain.addBlock(txs2);
+
+  std::cout << "Balance Jamal: " << blockchain.getBalance("jamal") << "\n";
+  std::cout << "Balance Udin: " << blockchain.getBalance("udin") << "\n";
 }
