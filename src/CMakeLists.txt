@@ -1,22 +1,23 @@
-add_library(core
-    core/block.cpp
-    core/blockchain.cpp
-    core/transaction.cpp
+find_package(OpenSSL REQUIRED)
+
+add_library(core  
+    core/block.cpp  
+    core/blockchain.cpp  
+    core/transaction.cpp  
 )
 
-add_library(crypto
-    crypto/hash.cpp
+add_library(crypto  
+    crypto/hash.cpp  
+    crypto/ecdsa.cpp  
+)
+
+target_link_libraries(crypto  
+    OpenSSL::Crypto  
 )
 
 add_executable(karbitcoin main.cpp)
 
-target_link_libraries(karbitcoin
-    core
-    crypto
-)
-
-find_package(OpenSSL REQUIRED)
-
-target_link_libraries(crypto
-    OpenSSL::Crypto
+target_link_libraries(karbitcoin  
+    core  
+    crypto  
 )

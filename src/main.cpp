@@ -1,17 +1,18 @@
-#include "core/blockchain.hpp"
+#include "core/transaction.hpp"
+#include "crypto/ecdsa.hpp"
 #include <iostream>
 
 int main() {
-  Blockchain blockchain(5);
+  auto [keyPriv, keyPub] = generateKeyPair();
 
-  std::vector<Transaction> txs1 = {Transaction("SYSTEM", "jamal", 100)};
+  Transaction tx("alice", "bob", 50);
 
-  blockchain.addBlock(txs1);
+  std::string hash = tx.calculateHash();
 
-  std::vector<Transaction> txs2 = {Transaction("jamal", "udin", 30)};
+  tx.signature = signData(keyPriv, hash);
+  tx.publicKey = keyPub;
 
-  blockchain.addBlock(txs2);
+  bool valid = verifySignature(tx.publicKey, hash, tx.signature);
 
-  std::cout << "Balance Jamal: " << blockchain.getBalance("jamal") << "\n";
-  std::cout << "Balance Udin: " << blockchain.getBalance("udin") << "\n";
+  std::cout << "Signature valid: " << valid << "\n";
 }
