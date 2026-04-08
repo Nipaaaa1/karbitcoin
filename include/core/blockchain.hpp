@@ -19,8 +19,11 @@ public:
   double getBalance(const std::string &address) const;
   const std::vector<Block> &getChain() const;
 
+  bool isValidBlock(const Block &current, const Block &previous) const;
+  bool isChainValid() const;
+
 private:
-  bool isValidTransartion(const Transaction &tx) const;
+  bool isValidTransaction(const Transaction &tx) const;
   Block createGenesisBlock();
   const Block &getLatestBlock() const;
 };

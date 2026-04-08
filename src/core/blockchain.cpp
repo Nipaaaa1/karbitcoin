@@ -3,7 +3,7 @@
 #include "core/transaction.hpp"
 #include "crypto/address.hpp"
 #include "crypto/ecdsa.hpp"
-#include <stdexcept>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -20,20 +20,22 @@ Block Blockchain::createGenesisBlock() {
 const Block &Blockchain::getLatestBlock() const { return chain.back(); }
 
 void Blockchain::addTransaction(const Transaction &tx) {
-  if (!isValidTransartion(tx)) {
-    std::runtime_error("Invalid transaction detected");
+  if (!isValidTransaction(tx)) {
+    return;
   }
 
-  double balance = getBalance(tx.from);
+  if (tx.from != "SYSTEM") {
+    double balance = getBalance(tx.from) - tx.amount;
 
-  for (const auto &t : mempool) {
-    if (tx.from == t.from) {
-      balance -= t.amount;
+    for (const auto &t : mempool) {
+      if (t.from == tx.from) {
+        balance -= t.amount;
+      }
     }
-  }
 
-  if (balance < 0) {
-    std::runtime_error("Invalid transaction (double spending) detected");
+    if (balance < 0) {
+      return;
+    }
   }
 
   mempool.push_back(tx);
@@ -70,7 +72,7 @@ double Blockchain::getBalance(const std::string &address) const {
   return balance;
 }
 
-bool Blockchain::isValidTransartion(const Transaction &tx) const {
+bool Blockchain::isValidTransaction(const Transaction &tx) const {
   if (tx.from == "SYSTEM")
     return true;
 
@@ -83,11 +85,36 @@ bool Blockchain::isValidTransartion(const Transaction &tx) const {
     return false;
   }
 
-  if (getBalance(tx.from) < tx.amount) {
+  return true;
+}
+
+const std::vector<Block> &Blockchain::getChain() const { return chain; }
+
+bool Blockchain::isValidBlock(const Block &current,
+                              const Block &previous) const {
+  if (current.previousHash != previous.hash) {
+    return false;
+  }
+
+  if (current.hash != current.calculateHash()) {
+    return false;
+  }
+
+  std::string target(difficulty, '0');
+
+  if (current.hash.substr(0, difficulty) != target) {
     return false;
   }
 
   return true;
 }
 
-const std::vector<Block> &Blockchain::getChain() const { return chain; }
+bool Blockchain::isChainValid() const {
+  for (size_t i = 1; i < chain.size(); i++) {
+    if (!isValidBlock(chain[i], chain[i - 1])) {
+      return false;
+    }
+  }
+
+  return true;
+}

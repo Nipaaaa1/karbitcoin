@@ -19,7 +19,7 @@ int main() {
   blockchain.addTransaction({t1});
   blockchain.minePendingTransactions(addressA);
 
-  Transaction t2(addressA, addressB, 20);
+  Transaction t2(addressA, addressB, 200);
   t2.publicKey = publicA;
   t2.signature = signData(privateA, t2.calculateHash());
 
@@ -30,4 +30,11 @@ int main() {
             << " Balance: " << blockchain.getBalance(addressA) << "\n";
   std::cout << "Address " << addressB
             << " Balance: " << blockchain.getBalance(addressB) << "\n";
+
+  std::cout << "Chain valid: " << blockchain.isChainValid() << "\n";
+
+  auto &chain = const_cast<std::vector<Block> &>(blockchain.getChain());
+  chain[1].transactions[0].amount = 9999;
+
+  std::cout << "After tamper: " << blockchain.isChainValid() << "\n";
 }
