@@ -16,13 +16,15 @@ int main() {
 
   Transaction t1("SYSTEM", addressA, 50);
 
-  blockchain.addBlock({t1});
+  blockchain.addTransaction({t1});
+  blockchain.minePendingTransactions(addressA);
 
   Transaction t2(addressA, addressB, 20);
   t2.publicKey = publicA;
   t2.signature = signData(privateA, t2.calculateHash());
 
-  blockchain.addBlock({t2});
+  blockchain.addTransaction({t2});
+  blockchain.minePendingTransactions(addressB);
 
   std::cout << "Address " << addressA
             << " Balance: " << blockchain.getBalance(addressA) << "\n";

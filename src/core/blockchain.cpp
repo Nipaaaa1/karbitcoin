@@ -19,17 +19,37 @@ Block Blockchain::createGenesisBlock() {
 
 const Block &Blockchain::getLatestBlock() const { return chain.back(); }
 
-void Blockchain::addBlock(const std::vector<Transaction> &txs) {
-  for (const auto &tx : txs) {
-    if (!isValidTransartion(tx)) {
-      std::runtime_error("Invalid transaction detected");
+void Blockchain::addTransaction(const Transaction &tx) {
+  if (!isValidTransartion(tx)) {
+    std::runtime_error("Invalid transaction detected");
+  }
+
+  double balance = getBalance(tx.from);
+
+  for (const auto &t : mempool) {
+    if (tx.from == t.from) {
+      balance -= t.amount;
     }
   }
+
+  if (balance < 0) {
+    std::runtime_error("Invalid transaction (double spending) detected");
+  }
+
+  mempool.push_back(tx);
+}
+
+void Blockchain::minePendingTransactions(const std::string &minerAddress) {
+  Transaction reward("SYSTEM", minerAddress, 50);
+  mempool.push_back(reward);
+
   const Block &prev = getLatestBlock();
-  Block newBlock(chain.size(), txs, prev.hash);
+  Block newBlock(chain.size(), mempool, prev.hash);
 
   newBlock.mine(difficulty);
   chain.push_back(newBlock);
+
+  mempool.clear();
 }
 
 double Blockchain::getBalance(const std::string &address) const {
