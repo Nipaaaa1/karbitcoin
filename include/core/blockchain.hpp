@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/block.hpp"
+#include "core/transaction.hpp"
 #include <string>
 #include <vector>
 
@@ -14,7 +15,7 @@ public:
 
   void addBlock(const std::vector<Transaction> &txs);
   double getBalance(const std::string &address) const;
-
+  bool isValidTransartion(const Transaction &tx) const;
   const std::vector<Block> &getChain() const;
 
 private:

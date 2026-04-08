@@ -1,7 +1,9 @@
 #include "core/blockchain.hpp"
 #include "core/block.hpp"
 #include "core/transaction.hpp"
-#include <iostream>
+#include "crypto/address.hpp"
+#include "crypto/ecdsa.hpp"
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -18,6 +20,11 @@ Block Blockchain::createGenesisBlock() {
 const Block &Blockchain::getLatestBlock() const { return chain.back(); }
 
 void Blockchain::addBlock(const std::vector<Transaction> &txs) {
+  for (const auto &tx : txs) {
+    if (!isValidTransartion(tx)) {
+      std::runtime_error("Invalid transaction detected");
+    }
+  }
   const Block &prev = getLatestBlock();
   Block newBlock(chain.size(), txs, prev.hash);
 
@@ -41,6 +48,26 @@ double Blockchain::getBalance(const std::string &address) const {
   }
 
   return balance;
+}
+
+bool Blockchain::isValidTransartion(const Transaction &tx) const {
+  if (tx.from == "SYSTEM")
+    return true;
+
+  if (!verifySignature(tx.publicKey, tx.calculateHash(), tx.signature)) {
+    return false;
+  }
+
+  std::string derived = publicKeyToAddress(tx.publicKey);
+  if (derived != tx.from) {
+    return false;
+  }
+
+  if (getBalance(tx.from) < tx.amount) {
+    return false;
+  }
+
+  return true;
 }
 
 const std::vector<Block> &Blockchain::getChain() const { return chain; }

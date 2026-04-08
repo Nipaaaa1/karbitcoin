@@ -8,7 +8,8 @@ add_library(core
 
 add_library(crypto  
     crypto/hash.cpp  
-    crypto/ecdsa.cpp  
+    crypto/ecdsa.cpp
+    crypto/address.cpp
 )
 
 target_link_libraries(crypto  
