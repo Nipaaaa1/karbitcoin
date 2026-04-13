@@ -1,35 +1,31 @@
 #include "core/blockchain.hpp"
 #include "core/transaction.hpp"
-#include "crypto/address.hpp"
-#include "crypto/ecdsa.hpp"
+#include "crypto/wallet.hpp"
 #include <iostream>
 #include <string>
 
 int main() {
   Blockchain blockchain(3);
 
-  auto [privateA, publicA] = generateKeyPair();
-  auto [privateB, publicB] = generateKeyPair();
+  Wallet udin;
+  Wallet jamal;
 
-  std::string addressA = publicKeyToAddress(publicA);
-  std::string addressB = publicKeyToAddress(publicB);
-
-  Transaction t1("SYSTEM", addressA, 50);
+  Transaction t1("SYSTEM", udin.getAddress(), 50);
 
   blockchain.addTransaction({t1});
-  blockchain.minePendingTransactions(addressA);
+  blockchain.minePendingTransactions(udin.getAddress());
 
-  Transaction t2(addressA, addressB, 200);
-  t2.publicKey = publicA;
-  t2.signature = signData(privateA, t2.calculateHash());
+  Transaction t2(udin.getAddress(), jamal.getAddress(), 200);
+  udin.signTransaction(t2);
 
   blockchain.addTransaction({t2});
-  blockchain.minePendingTransactions(addressB);
+  blockchain.minePendingTransactions(jamal.getAddress());
 
-  std::cout << "Address " << addressA
-            << " Balance: " << blockchain.getBalance(addressA) << "\n";
-  std::cout << "Address " << addressB
-            << " Balance: " << blockchain.getBalance(addressB) << "\n";
+  std::cout << "Address " << udin.getAddress()
+            << " Balance: " << blockchain.getBalance(udin.getAddress()) << "\n";
+  std::cout << "Address " << jamal.getAddress()
+            << " Balance: " << blockchain.getBalance(jamal.getAddress())
+            << "\n";
 
   std::cout << "Chain valid: " << blockchain.isChainValid() << "\n";
 
