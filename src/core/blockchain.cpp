@@ -1,9 +1,7 @@
 #include "core/blockchain.hpp"
 #include "core/block.hpp"
-#include "core/transaction.hpp"
-#include "crypto/address.hpp"
 #include "crypto/ecdsa.hpp"
-#include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -23,27 +21,33 @@ void Blockchain::addTransaction(const Transaction &tx) {
   if (!isValidTransaction(tx)) {
     return;
   }
-
-  if (tx.from != "SYSTEM") {
-    double balance = getBalance(tx.from) - tx.amount;
-
-    for (const auto &t : mempool) {
-      if (t.from == tx.from) {
-        balance -= t.amount;
-      }
-    }
-
-    if (balance < 0) {
-      return;
-    }
-  }
-
   mempool.push_back(tx);
 }
 
+void Blockchain::applyTransaction(const Transaction &tx) {
+  for (const auto &input : tx.inputs) {
+    std::string key = generateUtxoKey(input.prevTxId, input.outputIndex);
+    if (utxoSet.find(key) == utxoSet.end()) {
+      throw std::runtime_error("Invalid Transaciton");
+    }
+    utxoSet.erase(key);
+  }
+
+  for (size_t i = 0; i < tx.outputs.size(); i++) {
+    std::string key = generateUtxoKey(tx.id, i);
+
+    utxoSet[key] = tx.outputs[i];
+  }
+}
+
+Transaction Blockchain::createCoinbase(const std::string &minerAddress) {
+  Transaction tx({}, {{minerAddress, 50}});
+
+  return tx;
+}
+
 void Blockchain::minePendingTransactions(const std::string &minerAddress) {
-  Transaction reward("SYSTEM", minerAddress, 50);
-  mempool.push_back(reward);
+  mempool.push_back(createCoinbase(minerAddress));
 
   const Block &prev = getLatestBlock();
   Block newBlock(chain.size(), mempool, prev.hash);
@@ -51,37 +55,29 @@ void Blockchain::minePendingTransactions(const std::string &minerAddress) {
   newBlock.mine(difficulty);
   chain.push_back(newBlock);
 
+  for (const auto &tx : mempool) {
+    applyTransaction(tx);
+  }
+
   mempool.clear();
 }
 
 double Blockchain::getBalance(const std::string &address) const {
   double balance = 0;
 
-  for (const auto &block : chain) {
-    for (const auto &tx : block.transactions) {
-      if (tx.from == address) {
-        balance -= tx.amount;
-      }
+  UTXOset addressUtxo = getUtxoFromAddress(address, utxoSet);
 
-      if (tx.to == address) {
-        balance += tx.amount;
-      }
-    }
+  for (const auto &[key, value] : addressUtxo) {
+    balance += value.amount;
   }
 
   return balance;
 }
 
+UTXOset Blockchain::getUtxoSet() { return utxoSet; }
+
 bool Blockchain::isValidTransaction(const Transaction &tx) const {
-  if (tx.from == "SYSTEM")
-    return true;
-
   if (!verifySignature(tx.publicKey, tx.calculateHash(), tx.signature)) {
-    return false;
-  }
-
-  std::string derived = publicKeyToAddress(tx.publicKey);
-  if (derived != tx.from) {
     return false;
   }
 

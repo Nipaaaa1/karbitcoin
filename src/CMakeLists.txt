@@ -11,6 +11,7 @@ add_library(crypto
     crypto/ecdsa.cpp
     crypto/address.cpp
     crypto/wallet.cpp
+    crypto/utxo.cpp
 )
 
 target_link_libraries(crypto  

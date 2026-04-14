@@ -16,7 +16,13 @@ Block::Block(const int &idx, const std::vector<Transaction> &txs,
 static std::string transactionToString(const std::vector<Transaction> &txs) {
   std::stringstream ss;
   for (const auto &tx : txs) {
-    ss << tx.from << tx.to << tx.amount;
+    ss << tx.id << tx.signature;
+    for (const auto &in : tx.inputs) {
+      ss << in.prevTxId << in.outputIndex;
+    }
+    for (const auto &out : tx.outputs) {
+      ss << out.address << out.amount;
+    }
   }
   return ss.str();
 }

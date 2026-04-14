@@ -9,15 +9,21 @@ class Blockchain {
 private:
   std::vector<Block> chain;
   std::vector<Transaction> mempool;
+  UTXOset utxoSet;
   int difficulty;
 
 public:
   Blockchain(int diff = 5);
 
+  Transaction createCoinbase(const std::string &minerAddress);
+
   void addTransaction(const Transaction &tx);
+  void applyTransaction(const Transaction &tx);
   void minePendingTransactions(const std::string &minerAddress);
+
   double getBalance(const std::string &address) const;
   const std::vector<Block> &getChain() const;
+  UTXOset getUtxoSet();
 
   bool isValidBlock(const Block &current, const Block &previous) const;
   bool isChainValid() const;
