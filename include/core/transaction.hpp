@@ -7,6 +7,7 @@
 class Transaction {
 public:
   std::string id;
+  long timestamp;
   std::vector<TxIn> inputs;
   std::vector<TxOut> outputs;
 
@@ -17,7 +18,10 @@ public:
 
   std::string calculateHash() const;
   void setId();
+
+  double getValueIn(const UTXOset &utxoSet) const;
+  double getValueOut() const;
 };
 
 Transaction createTransaction(const std::string &from, const std::string &to,
-                              double amount, UTXOset utxoSet);
+                              double amount, double fee, UTXOset utxoSet);

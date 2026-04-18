@@ -15,7 +15,7 @@ private:
 public:
   Blockchain(int diff = 5);
 
-  Transaction createCoinbase(const std::string &minerAddress);
+  Transaction createCoinbase(const std::string &minerAddress, double fees);
 
   void addTransaction(const Transaction &tx);
   void applyTransaction(const Transaction &tx);

@@ -72,6 +72,9 @@ karbitcoin/
 - [x] Mining with block rewards (Coinbase transactions)
 - [x] Block validation (hash, PoW, linkage)
 - [x] Full chain validation (tamper detection)
+- [x] Transaction fees (incentive for miners)
+- [x] Replay attack protection (unique timestamps in transactions)
+- [x] Advanced double-spending prevention across unconfirmed blocks (mempool validation)
 
 ---
 
@@ -79,9 +82,7 @@ karbitcoin/
 
 🔐 Security & Validation
 
-- [ ] Transaction fees
-- [ ] Replay attack protection (nonce per account or unique UTXO usage)
-- [ ] Advanced double-spending prevention across unconfirmed blocks
+- [ ] (Completed)
 
 🌐 Networking
 
