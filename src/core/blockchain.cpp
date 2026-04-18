@@ -42,12 +42,12 @@ void Blockchain::applyTransaction(const Transaction &tx) {
 
 Transaction Blockchain::createCoinbase(const std::string &minerAddress) {
   Transaction tx({}, {{minerAddress, 50}});
-
   return tx;
 }
 
 void Blockchain::minePendingTransactions(const std::string &minerAddress) {
-  mempool.push_back(createCoinbase(minerAddress));
+  Transaction coinbase = createCoinbase(minerAddress);
+  mempool.insert(mempool.begin(), coinbase);
 
   const Block &prev = getLatestBlock();
   Block newBlock(chain.size(), mempool, prev.hash);
@@ -65,20 +65,28 @@ void Blockchain::minePendingTransactions(const std::string &minerAddress) {
 double Blockchain::getBalance(const std::string &address) const {
   double balance = 0;
 
-  UTXOset addressUtxo = getUtxoFromAddress(address, utxoSet);
-
-  for (const auto &[key, value] : addressUtxo) {
+  for (const auto &[key, value] : getUtxoFromAddress(address, utxoSet)) {
     balance += value.amount;
   }
-
   return balance;
 }
 
 UTXOset Blockchain::getUtxoSet() { return utxoSet; }
 
 bool Blockchain::isValidTransaction(const Transaction &tx) const {
+  if (tx.inputs.empty()) {
+    return true;
+  }
+
   if (!verifySignature(tx.publicKey, tx.calculateHash(), tx.signature)) {
     return false;
+  }
+
+  for (const auto &input : tx.inputs) {
+    std::string key = generateUtxoKey(input.prevTxId, input.outputIndex);
+    if (utxoSet.find(key) == utxoSet.end()) {
+      return false;
+    }
   }
 
   return true;

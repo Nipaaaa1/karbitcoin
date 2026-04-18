@@ -16,6 +16,7 @@ public:
   Transaction(const std::vector<TxIn> &in, const std::vector<TxOut> &out);
 
   std::string calculateHash() const;
+  void setId();
 };
 
 Transaction createTransaction(const std::string &from, const std::string &to,
