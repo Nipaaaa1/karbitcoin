@@ -10,7 +10,7 @@ int main() {
 
   blockchain.minePendingTransactions(udin.getAddress());
 
-  Transaction t2 = createTransaction(udin.getAddress(), jamal.getAddress(), 20,
+  Transaction t2 = createTransaction(udin.getAddress(), jamal.getAddress(), 20, 1.0,
                                      blockchain.getUtxoSet());
   udin.signTransaction(t2);
 
