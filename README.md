@@ -59,17 +59,17 @@ karbitcoin/
 - [x] Blockchain with linked blocks
 - [x] SHA-256 hashing
 - [x] Proof of Work (mining + difficulty)
-- [x] Account-based transaction model
-- [x] Balance calculation
+- [x] UTXO-based transaction model (fixed selection logic)
+- [x] Proper Transaction ID initialization
+- [x] Balance calculation from UTXO set
 - [x] ECDSA digital signature (OpenSSL)
 - [x] Address generation from public key
 - [x] Transaction validation:
-  - signature verification
-  - balance checking
-  - sender authenticity
+  - Signature verification
+  - UTXO availability check (Double-spending protection)
+  - Sender authenticity
 - [x] Mempool (pending transactions)
-- [x] Mining with block rewards
-- [x] Basic double-spending protection
+- [x] Mining with block rewards (Coinbase transactions)
 - [x] Block validation (hash, PoW, linkage)
 - [x] Full chain validation (tamper detection)
 
@@ -80,9 +80,8 @@ karbitcoin/
 🔐 Security & Validation
 
 - [ ] Transaction fees
-- [ ] Replay attack protection (nonce per account)
-- [ ] Advanced double-spending prevention across blocks
-- [ ] UTXO model (currently account-based only)
+- [ ] Replay attack protection (nonce per account or unique UTXO usage)
+- [ ] Advanced double-spending prevention across unconfirmed blocks
 
 🌐 Networking
 
