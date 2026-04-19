@@ -18,3 +18,7 @@ find_package(Boost REQUIRED)
 include_directories(include ${Boost_INCLUDE_DIRS})
 
 add_subdirectory(src)
+
+enable_testing()
+add_subdirectory(tests)
+
