@@ -75,6 +75,10 @@ karbitcoin/
 - [x] Transaction fees (incentive for miners)
 - [x] Replay attack protection (unique timestamps in transactions)
 - [x] Advanced double-spending prevention across unconfirmed blocks (mempool validation)
+- [x] P2P node communication (TCP-based)
+- [x] Transaction broadcast
+- [x] Block propagation
+- [x] Chain synchronization (Basic handshake + sync)
 
 ---
 
@@ -86,11 +90,7 @@ karbitcoin/
 
 🌐 Networking
 
-- [ ] P2P node communication
-- [ ] Transaction broadcast
-- [ ] Block propagation
-- [ ] Peer discovery
-- [ ] Chain synchronization
+- [ ] Peer discovery (Automatic peer sharing)
 
 ⚡ Performance
 
@@ -175,8 +175,8 @@ Do NOT use this implementation in production or for real financial systems.
 - [x] Digital signatures
 - [x] Mempool
 - [x] Validation
-- [ ] Networking (next step)
-- [ ] Persistence
+- [x] Networking (Basic P2P + Sync)
+- [ ] Persistence (next step)
 - [ ] CLI wallet
 
 ---
