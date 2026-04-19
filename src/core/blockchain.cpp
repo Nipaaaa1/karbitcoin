@@ -1,6 +1,7 @@
 #include "core/blockchain.hpp"
 #include "core/block.hpp"
 #include "crypto/ecdsa.hpp"
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -127,7 +128,32 @@ bool Blockchain::isValidTransaction(const Transaction &tx) const {
   return true;
 }
 
-const std::vector<Block> &Blockchain::getChain() const { return chain; }
+size_t Blockchain::getHeight() const { return chain.size(); }
+
+const Block& Blockchain::getBlock(size_t index) const {
+    if (index >= chain.size()) {
+        throw std::runtime_error("Block index out of bounds");
+    }
+    return chain[index];
+}
+
+void Blockchain::addBlock(const Block& block) {
+    if (isValidBlock(block, getLatestBlock())) {
+        chain.push_back(block);
+        for (const auto& tx : block.transactions) {
+            applyTransaction(tx);
+            // Remove from mempool
+            auto it = std::find_if(mempool.begin(), mempool.end(), [&](const Transaction& t) {
+                return t.id == tx.id;
+            });
+            if (it != mempool.end()) {
+                mempool.erase(it);
+            }
+        }
+    } else {
+        throw std::runtime_error("Invalid block offered to blockchain");
+    }
+}
 
 bool Blockchain::isValidBlock(const Block &current,
                               const Block &previous) const {

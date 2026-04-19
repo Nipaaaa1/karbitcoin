@@ -43,6 +43,8 @@ public:
     void broadcast_transaction(const Transaction& tx);
     void broadcast_block(const Block& block);
 
+    Blockchain& get_blockchain() { return blockchain_; }
+
 private:
     void do_accept();
 
