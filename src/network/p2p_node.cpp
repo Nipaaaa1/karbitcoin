@@ -10,6 +10,9 @@ Session::Session(tcp::socket socket, P2PNode& node)
     : socket_(std::move(socket)), node_(node) {}
 
 void Session::start() {
+    // Send initial handshake
+    Message msg = {MessageType::HANDSHAKE, {{"height", node_.get_blockchain().getHeight()}}};
+    send(nlohmann::json(msg).dump());
     do_read();
 }
 
@@ -18,7 +21,7 @@ void Session::send(const std::string& message) {
     boost::asio::async_write(socket_, boost::asio::buffer(message + "\n"),
         [this, self](boost::system::error_code ec, std::size_t /*length*/) {
             if (ec) {
-                // Remove session on error (Phase 4 improvement)
+                // Connection lost or error
             }
         });
 }
@@ -100,32 +103,47 @@ void P2PNode::handle_message(const std::string& raw_message, std::shared_ptr<Ses
         Message msg = j.get<Message>();
 
         switch (msg.type) {
+            case MessageType::HANDSHAKE: {
+                size_t peer_height = msg.payload.at("height").get<size_t>();
+                size_t my_height = blockchain_.getHeight();
+                std::cout << "P2P: Handshake from peer. Peer height: " << peer_height << ", My height: " << my_height << std::endl;
+                
+                if (peer_height > my_height) {
+                    std::cout << "P2P: Peer is ahead. Requesting blocks from " << my_height << std::endl;
+                    Message req = {MessageType::GET_BLOCKS, {{"from_index", my_height}}};
+                    session->send(nlohmann::json(req).dump());
+                }
+                break;
+            }
+            case MessageType::GET_BLOCKS: {
+                size_t from_index = msg.payload.at("from_index").get<size_t>();
+                std::cout << "P2P: Peer requested blocks from index " << from_index << std::endl;
+                for (size_t i = from_index; i < blockchain_.getHeight(); ++i) {
+                    broadcast_block(blockchain_.getBlock(i));
+                }
+                break;
+            }
             case MessageType::TRANSACTION: {
                 Transaction tx = msg.payload.get<Transaction>();
-                std::cout << "P2P: Received transaction " << tx.id << std::endl;
-                // Add to mempool if valid
                 try {
                     blockchain_.addTransaction(tx);
-                    // Relay to others (Phase 4 propagation)
-                    // broadcast(raw_message); // Simplified relay
-                } catch (const std::exception& e) {
-                    std::cerr << "P2P: Transaction invalid: " << e.what() << std::endl;
-                }
+                } catch (...) {}
                 break;
             }
             case MessageType::BLOCK: {
                 Block block = msg.payload.get<Block>();
-                std::cout << "P2P: Received block " << block.hash << " at index " << block.index << std::endl;
-                // Process block (Add to chain if valid)
-                // TODO: Update Blockchain to support remote block adding
+                try {
+                    if (block.index == blockchain_.getHeight()) {
+                        blockchain_.addBlock(block);
+                        std::cout << "P2P: Successfully synchronized block " << block.index << std::endl;
+                    }
+                } catch (...) {}
                 break;
             }
             default:
                 break;
         }
-    } catch (const std::exception& e) {
-        std::cerr << "P2P: Error handling message: " << e.what() << std::endl;
-    }
+    } catch (...) {}
 }
 
 void P2PNode::broadcast_transaction(const Transaction& tx) {

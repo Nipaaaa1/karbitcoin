@@ -22,7 +22,9 @@ public:
   void minePendingTransactions(const std::string &minerAddress);
 
   double getBalance(const std::string &address) const;
-  const std::vector<Block> &getChain() const;
+  size_t getHeight() const;
+  const Block& getBlock(size_t index) const;
+  void addBlock(const Block& block);
   UTXOset getUtxoSet();
 
   bool isValidBlock(const Block &current, const Block &previous) const;

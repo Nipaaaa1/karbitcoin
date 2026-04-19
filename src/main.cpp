@@ -9,8 +9,14 @@
 using namespace karbitcoin::network;
 
 int main() {
-    Blockchain bc1(2);
-    Blockchain bc2(2);
+    Blockchain bc1(2); // Node 1
+    Blockchain bc2(2); // Node 2
+
+    // Node 1 mines a block first
+    Wallet miner;
+    bc1.minePendingTransactions(miner.getAddress());
+    std::cout << "Node 1 height: " << bc1.getHeight() << std::endl;
+    std::cout << "Node 2 height: " << bc2.getHeight() << std::endl;
 
     P2PNode node1(8333, bc1);
     P2PNode node2(8334, bc2);
@@ -21,25 +27,14 @@ int main() {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     // Connect node 2 to node 1
+    std::cout << "Node 2 connecting to Node 1..." << std::endl;
     node2.connect_to_peer("127.0.0.1", 8333);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-    // Create a wallet and transaction
-    Wallet udin;
-    Wallet jamal;
-    
-    // Give some balance to udin in bc1 and bc2 via mining (simulating sync or initial state)
-    bc1.minePendingTransactions(udin.getAddress());
-    bc2.minePendingTransactions(udin.getAddress());
+    // Wait for synchronization
+    std::this_thread::sleep_for(std::chrono::seconds(2));
 
-    Transaction tx = createTransaction(udin.getAddress(), jamal.getAddress(), 10, 1.0, bc1.getUtxoSet());
-    udin.signTransaction(tx);
-
-    std::cout << "Node 1 broadcasting transaction..." << std::endl;
-    node1.broadcast_transaction(tx);
-
-    // Wait for propagation
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    std::cout << "FINAL Node 1 height: " << bc1.getHeight() << std::endl;
+    std::cout << "FINAL Node 2 height: " << bc2.getHeight() << std::endl;
 
     node1.stop();
     node2.stop();
