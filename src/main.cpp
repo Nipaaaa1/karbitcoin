@@ -2,36 +2,47 @@
 #include "crypto/wallet.hpp"
 #include "network/p2p_node.hpp"
 #include "network/serialization.hpp"
-#include "network/message.hpp"
-#include <nlohmann/json.hpp>
 #include <iostream>
 #include <chrono>
 #include <thread>
 
-using json = nlohmann::json;
 using namespace karbitcoin::network;
 
 int main() {
-    // Start node 1
-    P2PNode node1(8333);
-    node1.start();
+    Blockchain bc1(2);
+    Blockchain bc2(2);
 
-    // Small delay to ensure node1 is listening
+    P2PNode node1(8333, bc1);
+    P2PNode node2(8334, bc2);
+
+    node1.start();
+    node2.start();
+
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    // Connect node 1 to itself as a test
-    node1.connect_to_peer("127.0.0.1", 8333);
-
-    // Small delay to allow connection to establish
+    // Connect node 2 to node 1
+    node2.connect_to_peer("127.0.0.1", 8333);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-    // Test broadcast
-    json msg = {{"type", "test"}, {"data", "hello world"}};
-    node1.broadcast(msg.dump());
+    // Create a wallet and transaction
+    Wallet udin;
+    Wallet jamal;
+    
+    // Give some balance to udin in bc1 and bc2 via mining (simulating sync or initial state)
+    bc1.minePendingTransactions(udin.getAddress());
+    bc2.minePendingTransactions(udin.getAddress());
 
-    // Wait to see "Received message" in logs
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    Transaction tx = createTransaction(udin.getAddress(), jamal.getAddress(), 10, 1.0, bc1.getUtxoSet());
+    udin.signTransaction(tx);
+
+    std::cout << "Node 1 broadcasting transaction..." << std::endl;
+    node1.broadcast_transaction(tx);
+
+    // Wait for propagation
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     node1.stop();
+    node2.stop();
+
     return 0;
 }
