@@ -5,10 +5,13 @@ include(GoogleTest)
 add_executable(test_crypto 
     unit/crypto/test_hash.cpp
     unit/crypto/test_ecdsa.cpp
+    unit/crypto/test_utxo.cpp
+    unit/crypto/test_wallet.cpp
 )
 target_link_libraries(test_crypto 
     GTest::gtest_main 
     crypto
+    core
 )
 gtest_discover_tests(test_crypto)
 
@@ -24,3 +27,14 @@ target_link_libraries(test_core
     crypto
 )
 gtest_discover_tests(test_core)
+
+# Integration Tests
+add_executable(test_integration
+    integration/test_mining_flow.cpp
+)
+target_link_libraries(test_integration
+    GTest::gtest_main
+    core
+    crypto
+)
+gtest_discover_tests(test_integration)
