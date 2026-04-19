@@ -14,13 +14,25 @@ add_library(crypto
     crypto/utxo.cpp
 )
 
+add_library(network
+    network/p2p_node.cpp
+)
+
 target_link_libraries(crypto  
     OpenSSL::Crypto  
+)
+
+target_link_libraries(network
+    core
+    crypto
+    ${Boost_LIBRARIES}
+    nlohmann_json::nlohmann_json
 )
 
 add_executable(karbitcoin main.cpp)
 
 target_link_libraries(karbitcoin  
     core  
-    crypto  
+    crypto
+    network
 )
