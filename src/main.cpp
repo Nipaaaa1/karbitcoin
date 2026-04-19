@@ -1,32 +1,41 @@
 #include "core/blockchain.hpp"
 #include "crypto/wallet.hpp"
+#include "network/p2p_node.hpp"
+#include <nlohmann/json.hpp>
 #include <iostream>
 
+using json = nlohmann::json;
+
 int main() {
-  Blockchain blockchain(3);
+    // Testing JSON dependency
+    json test_json = {{"status", "networking_initialized"}};
+    std::cout << "JSON Test: " << test_json.dump() << std::endl;
 
-  Wallet udin;
-  Wallet jamal;
+    // Testing P2PNode initialization
+    karbitcoin::network::P2PNode node(8333);
+    node.start();
 
-  blockchain.minePendingTransactions(udin.getAddress());
+    Blockchain blockchain(3);
+    Wallet udin;
+    Wallet jamal;
 
-  Transaction t2 = createTransaction(udin.getAddress(), jamal.getAddress(), 20, 1.0,
-                                     blockchain.getUtxoSet());
-  udin.signTransaction(t2);
+    blockchain.minePendingTransactions(udin.getAddress());
 
-  blockchain.addTransaction({t2});
-  blockchain.minePendingTransactions(jamal.getAddress());
+    Transaction t2 = createTransaction(udin.getAddress(), jamal.getAddress(), 20, 1.0,
+                                        blockchain.getUtxoSet());
+    udin.signTransaction(t2);
 
-  std::cout << "Address " << udin.getAddress()
-            << " Balance: " << blockchain.getBalance(udin.getAddress()) << "\n";
-  std::cout << "Address " << jamal.getAddress()
-            << " Balance: " << blockchain.getBalance(jamal.getAddress())
-            << "\n";
+    blockchain.addTransaction({t2});
+    blockchain.minePendingTransactions(jamal.getAddress());
 
-  std::cout << "Chain valid: " << blockchain.isChainValid() << "\n";
+    std::cout << "Address " << udin.getAddress()
+                << " Balance: " << blockchain.getBalance(udin.getAddress()) << "\n";
+    std::cout << "Address " << jamal.getAddress()
+                << " Balance: " << blockchain.getBalance(jamal.getAddress())
+                << "\n";
 
-  auto &chain = const_cast<std::vector<Block> &>(blockchain.getChain());
-  chain[1].transactions[0].outputs[0].amount = 9999;
+    std::cout << "Chain valid: " << blockchain.isChainValid() << "\n";
 
-  std::cout << "After tamper: " << blockchain.isChainValid() << "\n";
+    node.stop();
+    return 0;
 }
