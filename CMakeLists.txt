@@ -9,15 +9,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# Fetch nlohmann/json
-include(FetchContent)
-set(JSON_BuildTests OFF CACHE INTERNAL "")
-FetchContent_Declare(
-    json
-    URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-)
-FetchContent_MakeAvailable(json)
+# Find nlohmann_json
+find_package(nlohmann_json REQUIRED)
 
 # Find Boost
 find_package(Boost REQUIRED)
