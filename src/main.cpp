@@ -5,42 +5,33 @@
 #include "network/message.hpp"
 #include <nlohmann/json.hpp>
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 using json = nlohmann::json;
 using namespace karbitcoin::network;
 
 int main() {
-    Blockchain blockchain(3);
-    Wallet udin;
-    Wallet jamal;
+    // Start node 1
+    P2PNode node1(8333);
+    node1.start();
 
-    blockchain.minePendingTransactions(udin.getAddress());
+    // Small delay to ensure node1 is listening
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    Transaction t2 = createTransaction(udin.getAddress(), jamal.getAddress(), 20, 1.0,
-                                        blockchain.getUtxoSet());
-    udin.signTransaction(t2);
+    // Connect node 1 to itself as a test
+    node1.connect_to_peer("127.0.0.1", 8333);
 
-    // Test Transaction Serialization
-    json t_json = t2;
-    Transaction t_deserialized = t_json.get<Transaction>();
-    std::cout << "Transaction Serialization Test: " << (t2.id == t_deserialized.id ? "PASSED" : "FAILED") << std::endl;
+    // Small delay to allow connection to establish
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-    // Test Message with Transaction Payload
-    Message msg = {MessageType::TRANSACTION, t_json};
-    json msg_json = msg;
-    Message msg_deserialized = msg_json.get<Message>();
-    std::cout << "Message Serialization Test: " << (msg_deserialized.type == MessageType::TRANSACTION ? "PASSED" : "FAILED") << std::endl;
+    // Test broadcast
+    json msg = {{"type", "test"}, {"data", "hello world"}};
+    node1.broadcast(msg.dump());
 
-    blockchain.addTransaction({t2});
-    blockchain.minePendingTransactions(jamal.getAddress());
+    // Wait to see "Received message" in logs
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-    // Test Block Serialization
-    Block last_block = blockchain.getChain().back();
-    json b_json = last_block;
-    Block b_deserialized = b_json.get<Block>();
-    std::cout << "Block Serialization Test: " << (last_block.hash == b_deserialized.hash ? "PASSED" : "FAILED") << std::endl;
-
-    std::cout << "Chain valid: " << blockchain.isChainValid() << "\n";
-
+    node1.stop();
     return 0;
 }
