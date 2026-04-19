@@ -12,6 +12,7 @@ public:
   std::string hash;
   int nonce;
 
+  Block() = default;
   Block(const int &idx, const std::vector<Transaction> &txs,
         const std::string &prevHash);
 
