@@ -14,6 +14,7 @@ public:
   std::string signature;
   std::string publicKey;
 
+  Transaction() = default;
   Transaction(const std::vector<TxIn> &in, const std::vector<TxOut> &out);
 
   std::string calculateHash() const;
