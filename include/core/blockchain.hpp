@@ -34,6 +34,9 @@ public:
   void saveBlock(const Block& block) const;
   void loadFromDisk();
 
+  void saveUTXOSet() const;
+  void loadUTXOSet();
+
 private:
   bool isValidTransaction(const Transaction &tx) const;
   Block createGenesisBlock();

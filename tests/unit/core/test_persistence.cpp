@@ -41,3 +41,22 @@ TEST_F(PersistenceTest, SaveAndLoadBlockchain) {
         EXPECT_GT(bc_reloaded.getBalance(miner), 0.0);
     }
 }
+
+TEST_F(PersistenceTest, UtxoPersistence) {
+    std::string miner = "miner_addr";
+    double initial_balance = 0;
+    {
+        Blockchain bc(1, data_dir);
+        bc.minePendingTransactions(miner);
+        initial_balance = bc.getBalance(miner);
+        EXPECT_GT(initial_balance, 0);
+        // UTXO should be saved after block is mined (via applyTransaction)
+    }
+
+    {
+        // Restart blockchain
+        Blockchain bc_reloaded(1, data_dir);
+        // Balance should be same
+        EXPECT_EQ(bc_reloaded.getBalance(miner), initial_balance);
+    }
+}
