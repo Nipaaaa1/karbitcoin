@@ -11,6 +11,12 @@ public:
   Wallet();
 
   std::string getPublicKey();
+  std::string getPrivateKey();
   std::string getAddress();
   void signTransaction(Transaction &tx);
+
+  void saveToFile(const std::string& filename);
+  void loadFromFile(const std::string& filename);
+  
+  void setKeys(const std::string& priv, const std::string& pub);
 };
