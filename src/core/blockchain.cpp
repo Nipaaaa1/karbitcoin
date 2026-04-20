@@ -1,15 +1,73 @@
 #include "core/blockchain.hpp"
 #include "core/block.hpp"
+#include "core/storage.hpp"
+#include "network/serialization.hpp"
 #include "crypto/ecdsa.hpp"
 #include <algorithm>
+#include <filesystem>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-Blockchain::Blockchain(int diff) : difficulty(diff) {
-  Block genesisBlock = createGenesisBlock();
-  genesisBlock.mine(difficulty);
-  chain.push_back(genesisBlock);
+namespace fs = std::filesystem;
+
+Blockchain::Blockchain(int diff, const std::string& dir) : difficulty(diff), dataDir(dir) {
+  if (fs::exists(dataDir + "/blocks")) {
+    loadFromDisk();
+  }
+  
+  if (chain.empty()) {
+    Block genesisBlock = createGenesisBlock();
+    genesisBlock.mine(difficulty);
+    chain.push_back(genesisBlock);
+    saveBlock(genesisBlock);
+  }
+}
+
+void Blockchain::saveBlock(const Block& block) const {
+    std::string path = dataDir + "/blocks/block_" + std::to_string(block.index) + ".json";
+    nlohmann::json j = block;
+    Storage::saveJson(path, j);
+}
+
+void Blockchain::loadFromDisk() {
+    std::string blocksDir = dataDir + "/blocks";
+    if (!fs::exists(blocksDir)) return;
+
+    std::vector<std::string> blockFiles;
+    for (const auto& entry : fs::directory_iterator(blocksDir)) {
+        if (entry.path().extension() == ".json") {
+            blockFiles.push_back(entry.path().string());
+        }
+    }
+
+    // Sort by index to ensure correct order
+    std::sort(blockFiles.begin(), blockFiles.end(), [](const std::string& a, const std::string& b) {
+        // Simple extraction of index from filename "block_N.json"
+        auto getIndex = [](const std::string& path) {
+            std::string filename = fs::path(path).stem().string();
+            return std::stoi(filename.substr(6));
+        };
+        return getIndex(a) < getIndex(b);
+    });
+
+    for (const auto& file : blockFiles) {
+        nlohmann::json j = Storage::loadJson(file);
+        if (!j.is_null()) {
+            Block b = j.get<Block>();
+            if (chain.empty()) {
+                chain.push_back(b);
+                for (const auto& tx : b.transactions) {
+                    applyTransaction(tx);
+                }
+            } else if (isValidBlock(b, chain.back())) {
+                chain.push_back(b);
+                for (const auto& tx : b.transactions) {
+                    applyTransaction(tx);
+                }
+            }
+        }
+    }
 }
 
 Block Blockchain::createGenesisBlock() {
@@ -77,6 +135,7 @@ void Blockchain::minePendingTransactions(const std::string &minerAddress) {
 
   newBlock.mine(difficulty);
   chain.push_back(newBlock);
+  saveBlock(newBlock);
 
   for (const auto &tx : mempool) {
     applyTransaction(tx);
@@ -140,6 +199,7 @@ const Block& Blockchain::getBlock(size_t index) const {
 void Blockchain::addBlock(const Block& block) {
     if (isValidBlock(block, getLatestBlock())) {
         chain.push_back(block);
+        saveBlock(block);
         for (const auto& tx : block.transactions) {
             applyTransaction(tx);
             // Remove from mempool

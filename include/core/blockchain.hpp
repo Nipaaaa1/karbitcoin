@@ -11,9 +11,10 @@ private:
   std::vector<Transaction> mempool;
   UTXOset utxoSet;
   int difficulty;
+  std::string dataDir;
 
 public:
-  Blockchain(int diff = 5);
+  Blockchain(int diff = 5, const std::string& dir = "data");
 
   Transaction createCoinbase(const std::string &minerAddress, double fees);
 
@@ -29,6 +30,9 @@ public:
 
   bool isValidBlock(const Block &current, const Block &previous) const;
   bool isChainValid() const;
+
+  void saveBlock(const Block& block) const;
+  void loadFromDisk();
 
 private:
   bool isValidTransaction(const Transaction &tx) const;
