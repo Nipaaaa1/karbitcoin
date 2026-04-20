@@ -1,10 +1,18 @@
 #include <gtest/gtest.h>
+#include <filesystem>
 #include "core/blockchain.hpp"
 #include "crypto/wallet.hpp"
 
+namespace fs = std::filesystem;
+
 TEST(IntegrationTest, MiningFlowTest) {
+    std::string test_data_dir = "test_integration_data";
+    if (fs::exists(test_data_dir)) {
+        fs::remove_all(test_data_dir);
+    }
+
     // 1. Setup Blockchain with low difficulty
-    Blockchain bc(1); 
+    Blockchain bc(1, test_data_dir); 
     
     Wallet miner;
     Wallet alice;
@@ -38,4 +46,6 @@ TEST(IntegrationTest, MiningFlowTest) {
     // 6. Final validity check
     EXPECT_TRUE(bc.isChainValid());
     EXPECT_EQ(bc.getHeight(), 3); // Genesis + 1st mine + 2nd mine
+
+    fs::remove_all(test_data_dir);
 }
