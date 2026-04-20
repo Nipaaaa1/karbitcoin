@@ -19,6 +19,10 @@ Blockchain::Blockchain(int diff, const std::string& dir) : difficulty(diff), dat
   if (fs::exists(dataDir + "/utxo.json")) {
     loadUTXOSet();
   }
+
+  if (fs::exists(dataDir + "/metadata.json")) {
+    loadMetadata();
+  }
   
   if (chain.empty()) {
     Block genesisBlock = createGenesisBlock();
@@ -26,7 +30,23 @@ Blockchain::Blockchain(int diff, const std::string& dir) : difficulty(diff), dat
     chain.push_back(genesisBlock);
     saveBlock(genesisBlock);
     saveUTXOSet();
+    saveMetadata();
   }
+}
+
+void Blockchain::saveMetadata() const {
+    nlohmann::json j = {
+        {"difficulty", difficulty},
+        {"height", chain.size()}
+    };
+    Storage::saveJson(dataDir + "/metadata.json", j);
+}
+
+void Blockchain::loadMetadata() {
+    nlohmann::json j = Storage::loadJson(dataDir + "/metadata.json");
+    if (!j.is_null()) {
+        difficulty = j.at("difficulty").get<int>();
+    }
 }
 
 void Blockchain::saveUTXOSet() const {
@@ -159,6 +179,7 @@ void Blockchain::minePendingTransactions(const std::string &minerAddress) {
   }
 
   saveUTXOSet();
+  saveMetadata();
   mempool.clear();
 }
 
@@ -229,6 +250,7 @@ void Blockchain::addBlock(const Block& block) {
             }
         }
         saveUTXOSet();
+        saveMetadata();
     } else {
         throw std::runtime_error("Invalid block offered to blockchain");
     }

@@ -37,6 +37,9 @@ public:
   void saveUTXOSet() const;
   void loadUTXOSet();
 
+  void saveMetadata() const;
+  void loadMetadata();
+
 private:
   bool isValidTransaction(const Transaction &tx) const;
   Block createGenesisBlock();
