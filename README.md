@@ -29,7 +29,7 @@ This project implements a minimal but proper cryptocurrency system, including:
 karbitcoin/
 ├── CMakeLists.txt
 ├── src/                # Implementation files
-│   ├── core/           # Blockchain, Block, Transaction logic
+│   ├── core/           # Blockchain, Block, Transaction, Storage logic
 │   ├── crypto/         # Hashing, ECDSA, Wallet, UTXO
 │   ├── network/        # P2P Node, Serialization
 │   └── main.cpp
@@ -58,7 +58,8 @@ karbitcoin/
 - [x] P2P node communication (TCP)
 - [x] Transaction & Block propagation
 - [x] Chain synchronization (Handshake + Sync)
-- [x] **Automated Testing (20+ cases)**
+- [x] **JSON-based Persistence (Blocks, UTXO, Metadata)**
+- [x] **Automated Testing (25+ cases)**
 
 ---
 
@@ -96,7 +97,7 @@ ctest --output-on-failure
 
 Tests include:
 - `test_crypto`: Hash, ECDSA, UTXO, and Wallet logic.
-- `test_core`: Transaction, Block, and Blockchain integrity.
+- `test_core`: Transaction, Block, Blockchain integrity, and Persistence.
 - `test_integration`: Full mining flow (Transaction -> Mining -> Balance check).
 
 ---
@@ -106,6 +107,7 @@ Tests include:
 - Simplicity over completeness
 - Readability over optimization
 - Incremental learning approach
+- **Robust Persistence**: JSON-based storage with auto-recovery support for UTXO sets from block history.
 
 ---
 
@@ -124,8 +126,8 @@ Do NOT use this implementation in production or for real financial systems.
 - [x] Digital signatures
 - [x] Mempool & Validation
 - [x] Networking (Basic P2P + Sync)
-- [x] **Testing Framework (GTest)**
-- [ ] Persistence (Save/Load to disk)
+- [x] Testing Framework (GTest)
+- [x] **Persistence (Save/Load to disk)**
 - [ ] CLI Wallet interface
 - [ ] Difficulty adjustment algorithm
 - [ ] Multi-threaded mining
