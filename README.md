@@ -59,6 +59,7 @@ karbitcoin/
 - [x] Transaction & Block propagation
 - [x] Chain synchronization (Handshake + Sync)
 - [x] **JSON-based Persistence (Blocks, UTXO, Metadata)**
+- [x] **Interactive CLI Wallet (Interactive & Persistent)**
 - [x] **Automated Testing (25+ cases)**
 
 ---
@@ -80,9 +81,51 @@ cmake --build build -j$(nproc)
 ```
 
 ### Run Node
+You can specify a custom port to run multiple nodes on the same machine. Data will be saved in `data_<port>/`.
 ```bash
-./build/bin/karbitcoin
+./build/bin/karbitcoin [port]
 ```
+*Default port is 8333 if not specified.*
+
+---
+
+## 💻 Interactive CLI
+
+The application provides a real-time interactive shell to manage your wallet and node.
+
+### Commands
+| Command | Description |
+|---------|-------------|
+| `status` | Show node status, wallet address, balance, and chain height. |
+| `balance` | Quick check of your current wallet balance. |
+| `mine` | Mine pending transactions into a new block. |
+| `send <addr> <amt>` | Send coins to a specific address. |
+| `connect <ip> <port>` | Connect your node to a peer. |
+| `info` | Show technical details about the blockchain and data directory. |
+| `help` | Display all available commands. |
+| `exit` | Safely stop the node and exit. |
+
+### Example Usage Scenario
+1. **Start Node A (Miner):**
+   ```bash
+   ./build/bin/karbitcoin 8333
+   karbitcoin> mine
+   karbitcoin> status # Balance should be 50 KBC
+   ```
+2. **Start Node B (Receiver):**
+   Open another terminal:
+   ```bash
+   ./build/bin/karbitcoin 8334
+   karbitcoin> status # Copy the Wallet Address
+   ```
+3. **Connect and Send:**
+   Back in Node A terminal:
+   ```bash
+   karbitcoin> connect 127.0.0.1 8334
+   karbitcoin> send <address_node_b> 10.5
+   karbitcoin> mine
+   karbitcoin> status # Balance decreases after send + reward
+   ```
 
 ---
 
@@ -108,6 +151,7 @@ Tests include:
 - Readability over optimization
 - Incremental learning approach
 - **Robust Persistence**: JSON-based storage with auto-recovery support for UTXO sets from block history.
+- **Persistent Wallets**: Keys are saved to `wallet.json` in the data directory.
 
 ---
 
@@ -127,8 +171,8 @@ Do NOT use this implementation in production or for real financial systems.
 - [x] Mempool & Validation
 - [x] Networking (Basic P2P + Sync)
 - [x] Testing Framework (GTest)
-- [x] **Persistence (Save/Load to disk)**
-- [ ] CLI Wallet interface
+- [x] Persistence (Save/Load to disk)
+- [x] **CLI Wallet interface**
 - [ ] Difficulty adjustment algorithm
 - [ ] Multi-threaded mining
 
