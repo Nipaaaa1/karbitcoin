@@ -4,6 +4,7 @@ add_library(core
     core/block.cpp  
     core/blockchain.cpp  
     core/transaction.cpp  
+    core/storage.cpp
 )
 
 add_library(crypto  
