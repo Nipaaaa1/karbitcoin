@@ -60,3 +60,23 @@ TEST_F(PersistenceTest, UtxoPersistence) {
         EXPECT_EQ(bc_reloaded.getBalance(miner), initial_balance);
     }
 }
+
+TEST_F(PersistenceTest, MetadataPersistence) {
+    {
+        Blockchain bc(3, data_dir); // Difficulty 3
+        bc.minePendingTransactions("miner");
+        EXPECT_EQ(bc.getHeight(), 2);
+    }
+
+    {
+        Blockchain bc_reloaded(1, data_dir); // Constructor diff 1 should be overridden by saved 3
+        // We need to check if difficulty is actually used in some way we can verify
+        // For now, let's just check if it was loaded
+        bc_reloaded.minePendingTransactions("miner2");
+        EXPECT_EQ(bc_reloaded.getHeight(), 3);
+        
+        // Verify the last block mined with difficulty 3
+        std::string target(3, '0');
+        EXPECT_EQ(bc_reloaded.getBlock(2).hash.substr(0, 3), target);
+    }
+}
