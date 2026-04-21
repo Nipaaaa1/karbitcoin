@@ -158,7 +158,30 @@ Transaction Blockchain::createCoinbase(const std::string &minerAddress,
   return tx;
 }
 
+int Blockchain::getAdjustedDifficulty() {
+  if (chain.size() == 0 || chain.size() % DIFFICULTY_ADJUSTMENT_INTERVAL != 0) {
+    return difficulty;
+  }
+
+  const Block &latestBlock = chain.back();
+  // Get the block from the start of the current interval
+  const Block &prevAdjustmentBlock = chain[chain.size() - DIFFICULTY_ADJUSTMENT_INTERVAL];
+
+  long timeExpected = DIFFICULTY_ADJUSTMENT_INTERVAL * EXPECTED_BLOCK_TIME;
+  long timeTaken = latestBlock.timestamp - prevAdjustmentBlock.timestamp;
+
+  if (timeTaken < timeExpected) {
+    return difficulty + 1;
+  } else if (timeTaken > timeExpected) {
+    return (difficulty > 1) ? difficulty - 1 : 1;
+  }
+
+  return difficulty;
+}
+
 void Blockchain::minePendingTransactions(const std::string &minerAddress) {
+  difficulty = getAdjustedDifficulty();
+  
   double totalFees = 0;
   for (const auto &tx : mempool) {
     totalFees += tx.getValueIn(utxoSet) - tx.getValueOut();
@@ -236,8 +259,16 @@ const Block& Blockchain::getBlock(size_t index) const {
 }
 
 void Blockchain::addBlock(const Block& block) {
+    int expectedDifficulty = getAdjustedDifficulty();
+    if (block.difficulty != expectedDifficulty) {
+        throw std::runtime_error("Invalid block difficulty: expected " + 
+                                 std::to_string(expectedDifficulty) + " but got " + 
+                                 std::to_string(block.difficulty));
+    }
+
     if (isValidBlock(block, getLatestBlock())) {
         chain.push_back(block);
+        difficulty = expectedDifficulty;
         saveBlock(block);
         for (const auto& tx : block.transactions) {
             applyTransaction(tx);
