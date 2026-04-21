@@ -40,7 +40,11 @@ public:
   void saveMetadata() const;
   void loadMetadata();
 
+  static const int DIFFICULTY_ADJUSTMENT_INTERVAL = 10;
+  static const int EXPECTED_BLOCK_TIME = 30; // seconds per block
+
 private:
+  int getAdjustedDifficulty();
   bool isValidTransaction(const Transaction &tx) const;
   Block createGenesisBlock();
   const Block &getLatestBlock() const;
