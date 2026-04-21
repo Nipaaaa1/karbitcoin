@@ -108,7 +108,7 @@ void Blockchain::loadFromDisk() {
 }
 
 Block Blockchain::createGenesisBlock() {
-  return Block(0, std::vector<Transaction>{}, "0");
+  return Block(0, std::vector<Transaction>{}, "0", difficulty);
 }
 
 const Block &Blockchain::getLatestBlock() const { return chain.back(); }
@@ -168,7 +168,7 @@ void Blockchain::minePendingTransactions(const std::string &minerAddress) {
   mempool.insert(mempool.begin(), coinbase);
 
   const Block &prev = getLatestBlock();
-  Block newBlock(chain.size(), mempool, prev.hash);
+  Block newBlock(chain.size(), mempool, prev.hash, difficulty);
 
   newBlock.mine(difficulty);
   chain.push_back(newBlock);
@@ -266,9 +266,9 @@ bool Blockchain::isValidBlock(const Block &current,
     return false;
   }
 
-  std::string target(difficulty, '0');
+  std::string target(current.difficulty, '0');
 
-  if (current.hash.substr(0, difficulty) != target) {
+  if (current.hash.substr(0, current.difficulty) != target) {
     return false;
   }
 
