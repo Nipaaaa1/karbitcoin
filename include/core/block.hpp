@@ -11,10 +11,11 @@ public:
   std::string previousHash;
   std::string hash;
   int nonce;
+  int difficulty;
 
   Block() = default;
   Block(const int &idx, const std::vector<Transaction> &txs,
-        const std::string &prevHash);
+        const std::string &prevHash, int diff = 0);
 
   std::string calculateHash() const;
   void mine(int difficulty);

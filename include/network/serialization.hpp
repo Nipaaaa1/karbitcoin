@@ -59,7 +59,8 @@ inline void to_json(nlohmann::json& j, const Block& b) {
         {"transactions", b.transactions},
         {"previousHash", b.previousHash},
         {"hash", b.hash},
-        {"nonce", b.nonce}
+        {"nonce", b.nonce},
+        {"difficulty", b.difficulty}
     };
 }
 inline void from_json(const nlohmann::json& j, Block& b) {
@@ -69,4 +70,9 @@ inline void from_json(const nlohmann::json& j, Block& b) {
     b.previousHash = j.at("previousHash").get<std::string>();
     b.hash = j.at("hash").get<std::string>();
     b.nonce = j.at("nonce").get<int>();
+    if (j.contains("difficulty")) {
+        b.difficulty = j.at("difficulty").get<int>();
+    } else {
+        b.difficulty = 0; // Default for old blocks
+    }
 }

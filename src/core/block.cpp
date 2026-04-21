@@ -7,8 +7,8 @@
 #include <vector>
 
 Block::Block(const int &idx, const std::vector<Transaction> &txs,
-             const std::string &prevHash)
-    : index(idx), transactions(txs), previousHash(prevHash), nonce(0) {
+             const std::string &prevHash, int diff)
+    : index(idx), transactions(txs), previousHash(prevHash), nonce(0), difficulty(diff) {
   timestamp = std::time(nullptr);
   hash = calculateHash();
 }
@@ -30,7 +30,7 @@ static std::string transactionToString(const std::vector<Transaction> &txs) {
 std::string Block::calculateHash() const {
   std::stringstream ss;
   ss << index << timestamp << transactionToString(transactions) << previousHash
-     << nonce;
+     << nonce << difficulty;
   return hashString(ss.str());
 }
 
