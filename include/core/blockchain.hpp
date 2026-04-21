@@ -6,6 +6,7 @@
 #include <vector>
 
 class Blockchain {
+  friend class BlockchainTest;
 private:
   std::vector<Block> chain;
   std::vector<Transaction> mempool;

@@ -22,6 +22,7 @@ add_executable(test_core
     unit/core/test_blockchain.cpp
     unit/core/test_storage.cpp
     unit/core/test_persistence.cpp
+    unit/core/test_difficulty.cpp
 )
 target_link_libraries(test_core
     GTest::gtest_main
