@@ -58,6 +58,7 @@ karbitcoin/
 - [x] P2P node communication (TCP)
 - [x] Transaction & Block propagation
 - [x] Chain synchronization (Handshake + Sync)
+- [x] **Improved P2P Reliability (Message Queue & Thread Safety)**
 - [x] **JSON-based Persistence (Blocks, UTXO, Metadata)**
 - [x] **Interactive CLI Wallet (Interactive & Persistent)**
 - [x] **Automated Testing (25+ cases)**
@@ -172,9 +173,10 @@ Do NOT use this implementation in production or for real financial systems.
 - [x] Networking (Basic P2P + Sync)
 - [x] Testing Framework (GTest)
 - [x] Persistence (Save/Load to disk)
-- [x] **CLI Wallet interface**
-- [ ] Difficulty adjustment algorithm
+- [x] CLI Wallet interface
+- [x] Difficulty adjustment algorithm
 - [ ] Multi-threaded mining
+
 
 ---
 
