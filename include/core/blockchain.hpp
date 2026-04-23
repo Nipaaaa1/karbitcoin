@@ -4,6 +4,7 @@
 #include "core/transaction.hpp"
 #include <string>
 #include <vector>
+#include <mutex>
 
 class Blockchain {
   friend class BlockchainTest;
@@ -13,6 +14,7 @@ private:
   UTXOset utxoSet;
   int difficulty;
   std::string dataDir;
+  mutable std::recursive_mutex blockchain_mutex_;
 
 public:
   Blockchain(int diff = 5, const std::string& dir = "data");
