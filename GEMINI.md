@@ -5,7 +5,7 @@ Dokumen ini berisi instruksi khusus untuk pengembangan proyek Karbitcoin menggun
 ## Alur Kerja Pengembangan
 
 ### 1. Perencanaan (Planning)
-Setiap kali ingin mengimplementasikan fitur baru atau memperbaiki bug, buatlah rencana implementasi terlebih dahulu. Rencana ini harus mencakup:
+Setiap kali ingin mengimplementasikan fitur baru atau memperbaiki bug, buatlah rencana implementasi terlebih dahulu dengan menggunakan plan mode. Rencana ini harus mencakup:
 - **Deskripsi Fitur/Bug**: Penjelasan singkat tentang apa yang akan dikerjakan.
 - **Library Tambahan**: Daftar library baru yang dibutuhkan (jika ada).
 - **Target Akhir**: Definisi sukses atau hasil akhir yang diharapkan.
@@ -27,6 +27,9 @@ Bagi rencana menjadi beberapa fase yang logis. Setiap fase harus dianggap sebaga
 ### 4. Komitmen Perubahan (Committing)
 - Lakukan commit setiap kali selesai menjalankan satu fase dalam rencana.
 - Gunakan standar **Conventional Commits** untuk pesan commit (contoh: `feat: add block validation logic`, `fix: resolve utxo lookup bug`).
+
+### 5. Post Implementation
+Setelah menyelesaikan rencana implementasi, update README.md agar sesuai dengan progress project terbaru. Setelah itu, push perubahannya ke remote.
 
 ## Catatan Tambahan
 Selalu prioritaskan integritas kode dan pengujian di setiap fase sebelum melangkah ke fase berikutnya.
