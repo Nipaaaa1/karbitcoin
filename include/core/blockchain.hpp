@@ -23,7 +23,7 @@ public:
 
   void addTransaction(const Transaction &tx);
   void applyTransaction(const Transaction &tx);
-  void minePendingTransactions(const std::string &minerAddress);
+  void minePendingTransactions(const std::string &minerAddress, int numThreads = 0);
 
   double getBalance(const std::string &address) const;
   size_t getHeight() const;
