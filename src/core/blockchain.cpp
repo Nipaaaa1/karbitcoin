@@ -26,7 +26,7 @@ Blockchain::Blockchain(int diff, const std::string& dir) : difficulty(diff), dat
   
   if (chain.empty()) {
     Block genesisBlock = createGenesisBlock();
-    genesisBlock.mine(difficulty);
+    genesisBlock.mine(difficulty, 1);
     chain.push_back(genesisBlock);
     saveBlock(genesisBlock);
     saveUTXOSet();
@@ -187,7 +187,7 @@ int Blockchain::getAdjustedDifficulty() {
   return difficulty;
 }
 
-void Blockchain::minePendingTransactions(const std::string &minerAddress) {
+void Blockchain::minePendingTransactions(const std::string &minerAddress, int numThreads) {
   std::lock_guard<std::recursive_mutex> lock(blockchain_mutex_);
   difficulty = getAdjustedDifficulty();
   
@@ -202,7 +202,7 @@ void Blockchain::minePendingTransactions(const std::string &minerAddress) {
   const Block &prev = getLatestBlock();
   Block newBlock(chain.size(), mempool, prev.hash, difficulty);
 
-  newBlock.mine(difficulty);
+  newBlock.mine(difficulty, numThreads);
   chain.push_back(newBlock);
   saveBlock(newBlock);
 

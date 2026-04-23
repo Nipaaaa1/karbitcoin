@@ -15,7 +15,7 @@ void print_help() {
               << "  help                       - Show this help message\n"
               << "  status                     - Show node and wallet status\n"
               << "  balance                    - Show wallet balance\n"
-              << "  mine                       - Mine pending transactions\n"
+              << "  mine [threads]             - Mine pending transactions (default: all cores)\n"
               << "  send <address> <amount>    - Send coins to an address\n"
               << "  connect <ip> <port>        - Connect to a peer\n"
               << "  info                       - Show blockchain info\n"
@@ -86,8 +86,18 @@ int main(int argc, char* argv[]) {
                 std::cout << "Usage: connect <ip> <port>" << std::endl;
             }
         } else if (cmd == "mine") {
-            std::cout << "Mining..." << std::endl;
-            bc.minePendingTransactions(wallet.getAddress());
+            int threads = 0;
+            if (ss >> threads) {
+                if (threads <= 0) threads = 1;
+            }
+            
+            if (threads > 0) {
+                std::cout << "Mining with " << threads << " threads..." << std::endl;
+            } else {
+                std::cout << "Mining with all available cores..." << std::endl;
+            }
+
+            bc.minePendingTransactions(wallet.getAddress(), threads);
             node.broadcast_block(bc.getBlock(bc.getHeight() - 1));
             std::cout << "Block mined! New height: " << bc.getHeight() << std::endl;
         } else if (cmd == "send") {
