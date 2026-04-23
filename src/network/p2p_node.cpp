@@ -18,9 +18,25 @@ void Session::start() {
 
 void Session::send(const std::string& message) {
     auto self(shared_from_this());
-    boost::asio::async_write(socket_, boost::asio::buffer(message + "\n"),
+    boost::asio::post(socket_.get_executor(), [this, self, message]() {
+        bool write_in_progress = !write_msgs_.empty();
+        write_msgs_.push_back(message + "\n");
+        if (!write_in_progress) {
+            do_write();
+        }
+    });
+}
+
+void Session::do_write() {
+    auto self(shared_from_this());
+    boost::asio::async_write(socket_, boost::asio::buffer(write_msgs_.front()),
         [this, self](boost::system::error_code ec, std::size_t /*length*/) {
-            if (ec) {
+            if (!ec) {
+                write_msgs_.pop_front();
+                if (!write_msgs_.empty()) {
+                    do_write();
+                }
+            } else {
                 // Connection lost or error
             }
         });
@@ -69,7 +85,10 @@ void P2PNode::do_accept() {
         [this](boost::system::error_code ec, tcp::socket socket) {
             if (!ec) {
                 auto session = std::make_shared<Session>(std::move(socket), *this);
-                sessions_.push_back(session);
+                {
+                    std::lock_guard<std::mutex> lock(sessions_mutex_);
+                    sessions_.push_back(session);
+                }
                 session->start();
             }
             do_accept();
@@ -85,13 +104,17 @@ void P2PNode::connect_to_peer(const std::string& host, unsigned short port) {
         [this, socket](boost::system::error_code ec, tcp::endpoint endpoint) {
             if (!ec) {
                 auto session = std::make_shared<Session>(std::move(*socket), *this);
-                sessions_.push_back(session);
+                {
+                    std::lock_guard<std::mutex> lock(sessions_mutex_);
+                    sessions_.push_back(session);
+                }
                 session->start();
             }
         });
 }
 
 void P2PNode::broadcast(const std::string& message) {
+    std::lock_guard<std::mutex> lock(sessions_mutex_);
     for (auto& session : sessions_) {
         session->send(message);
     }
@@ -119,7 +142,8 @@ void P2PNode::handle_message(const std::string& raw_message, std::shared_ptr<Ses
                 size_t from_index = msg.payload.at("from_index").get<size_t>();
                 std::cout << "P2P: Peer requested blocks from index " << from_index << std::endl;
                 for (size_t i = from_index; i < blockchain_.getHeight(); ++i) {
-                    broadcast_block(blockchain_.getBlock(i));
+                    Message block_msg = {MessageType::BLOCK, nlohmann::json(blockchain_.getBlock(i))};
+                    session->send(nlohmann::json(block_msg).dump());
                 }
                 break;
             }
@@ -127,7 +151,9 @@ void P2PNode::handle_message(const std::string& raw_message, std::shared_ptr<Ses
                 Transaction tx = msg.payload.get<Transaction>();
                 try {
                     blockchain_.addTransaction(tx);
-                } catch (...) {}
+                } catch (const std::exception& e) {
+                    std::cerr << "P2P Error: Failed to add transaction: " << e.what() << std::endl;
+                }
                 break;
             }
             case MessageType::BLOCK: {
@@ -137,13 +163,17 @@ void P2PNode::handle_message(const std::string& raw_message, std::shared_ptr<Ses
                         blockchain_.addBlock(block);
                         std::cout << "P2P: Successfully synchronized block " << block.index << std::endl;
                     }
-                } catch (...) {}
+                } catch (const std::exception& e) {
+                    std::cerr << "P2P Error: Failed to add block " << block.index << ": " << e.what() << std::endl;
+                }
                 break;
             }
             default:
                 break;
         }
-    } catch (...) {}
+    } catch (const std::exception& e) {
+        std::cerr << "P2P Error: Failed to handle message: " << e.what() << std::endl;
+    }
 }
 
 void P2PNode::broadcast_transaction(const Transaction& tx) {

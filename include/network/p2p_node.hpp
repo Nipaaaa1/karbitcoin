@@ -8,6 +8,8 @@
 #include <string>
 #include <memory>
 #include <functional>
+#include <deque>
+#include <mutex>
 
 namespace karbitcoin::network {
 
@@ -23,10 +25,12 @@ public:
 
 private:
     void do_read();
+    void do_write();
 
     tcp::socket socket_;
     P2PNode& node_;
     boost::asio::streambuf buffer_;
+    std::deque<std::string> write_msgs_;
 };
 
 class P2PNode {
@@ -53,6 +57,7 @@ private:
     boost::asio::io_context io_context_;
     std::unique_ptr<tcp::acceptor> acceptor_;
     std::vector<std::shared_ptr<Session>> sessions_;
+    std::mutex sessions_mutex_;
     std::thread thread_;
 };
 

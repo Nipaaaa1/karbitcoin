@@ -41,3 +41,17 @@ target_link_libraries(test_integration
     crypto
 )
 gtest_discover_tests(test_integration)
+
+# Network Tests
+add_executable(test_network
+    unit/network/test_p2p_node.cpp
+)
+target_link_libraries(test_network
+    GTest::gtest_main
+    network
+    core
+    crypto
+    ${Boost_LIBRARIES}
+    pthread
+)
+gtest_discover_tests(test_network)
