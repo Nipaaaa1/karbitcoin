@@ -15,7 +15,7 @@ public:
 
   Block() = default;
   Block(const int &idx, const std::vector<Transaction> &txs,
-        const std::string &prevHash, int diff = 0);
+        const std::string &prevHash, int diff = 0, long ts = 0);
 
   std::string calculateHash() const;
   void mine(int difficulty);

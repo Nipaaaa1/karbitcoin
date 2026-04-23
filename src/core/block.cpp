@@ -7,9 +7,13 @@
 #include <vector>
 
 Block::Block(const int &idx, const std::vector<Transaction> &txs,
-             const std::string &prevHash, int diff)
+             const std::string &prevHash, int diff, long ts)
     : index(idx), transactions(txs), previousHash(prevHash), nonce(0), difficulty(diff) {
-  timestamp = std::time(nullptr);
+  if (ts != 0) {
+    timestamp = ts;
+  } else {
+    timestamp = std::time(nullptr);
+  }
   hash = calculateHash();
 }
 
