@@ -61,7 +61,8 @@ karbitcoin/
 - [x] **Improved P2P Reliability (Message Queue & Thread Safety)**
 - [x] **JSON-based Persistence (Blocks, UTXO, Metadata)**
 - [x] **Interactive CLI Wallet (Interactive & Persistent)**
-- [x] **Automated Testing (25+ cases)**
+- [x] **Multi-threaded Mining (Configurable thread count)**
+- [x] **Automated Testing (30+ cases)**
 
 ---
 
@@ -175,7 +176,7 @@ Do NOT use this implementation in production or for real financial systems.
 - [x] Persistence (Save/Load to disk)
 - [x] CLI Wallet interface
 - [x] Difficulty adjustment algorithm
-- [ ] Multi-threaded mining
+- [x] Multi-threaded mining
 
 
 ---
