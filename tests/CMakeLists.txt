@@ -23,6 +23,7 @@ add_executable(test_core
     unit/core/test_storage.cpp
     unit/core/test_persistence.cpp
     unit/core/test_difficulty.cpp
+    unit/core/test_multithread_mining.cpp
 )
 target_link_libraries(test_core
     GTest::gtest_main
