@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="./karbitcoin_logo.png" alt="Karbitcoin Logo" width="200"/>
+</div>
+
 # Karbitcoin (Mini Cryptocurrency)
 
 ![C++](https://img.shields.io/badge/C%2B%2B-17-blue)
